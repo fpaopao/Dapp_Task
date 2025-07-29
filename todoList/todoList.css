@@ -1,0 +1,70 @@
+.box {
+  height: 800px;
+  width: 400px;
+  border: 1px solid black;
+  box-sizing: border-box;
+  padding: 20px 10px;
+}
+.box .add-list {
+  height: 30px;
+  width: 100%;
+}
+.box ul {
+  width: 100%;
+  height: calc(100% - 30px);
+  overflow: auto;
+}
+.box ul li {
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+  text-decoration: none;
+  background-color: #ccc;
+  margin-top: 10px;
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+.box ul li:hover {
+  background-color: #ddd;
+}
+.box ul li:hover p.cha {
+  display: block;
+  color: #000;
+}
+.box ul li:hover p.ok {
+  display: block;
+  color: #000;
+}
+.box ul li p.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.box ul li p.cha {
+  height: 30px;
+  width: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 20px;
+  margin: 5px 0;
+  cursor: pointer;
+  display: none;
+}
+.box ul li .ok {
+  height: 30px;
+  width: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 20px;
+  margin: 5px 5px;
+  cursor: pointer;
+  display: none;
+}
+.box ul .is-over {
+  text-decoration: line-through;
+}
+/*# sourceMappingURL=todoList.css.map */
