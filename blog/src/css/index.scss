@@ -1,0 +1,78 @@
+.pagebox {
+  width: 80%;
+  height: 100%;
+  background-color: #ccc;
+  margin: 0 auto;
+
+  .nav {
+    height: 120px;
+    width: 100%;
+
+  }
+
+  .bodycontent {
+    height: calc(100% - 120px);
+    width: 100%;
+    background-color: #ededed;
+    overflow: auto;
+  }
+}
+
+.item-list {
+  width: calc(100% - 20px);
+  height: 100px;
+  padding: 10px 10px;
+  margin: 0 10px;
+  border-bottom: 1px solid #ccc;
+
+  h4 {
+    height: 40px;
+    line-height: 40px;
+    font-weight: 700;
+  }
+}
+
+.itembox {
+  height: 100%;
+  width: 80%;
+  margin: 0 auto;
+
+
+  .header {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    .goback{
+      position: absolute;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+    }
+    .delete{
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      cursor: pointer;
+    }
+    .edit{
+      position: absolute;
+      right: 60px;
+      bottom: 10px;
+      cursor: pointer;
+    }
+
+    h1 {
+      font-size: 30px;
+      font-weight: bold;
+    }
+  }
+  .body{
+    height: calc(100% - 120px);
+    padding: 10px;
+  }
+
+}
