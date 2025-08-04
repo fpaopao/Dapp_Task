@@ -1,7 +1,7 @@
 import { WagmiProvider, useAccount } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { config } from "./config.ts";
-import { Account } from "./account.tsx";
+import { AccountViem } from "./account-viem.tsx";
 import { WalletOptions } from "./wallet-options.tsx";
 
 import { IndexPage } from "./testFun/index.tsx";
@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 
 function ConnectWallet() {
     const { isConnected } = useAccount();
-    if (isConnected) return <Account />;
+    if (isConnected) return <AccountViem />;
     return <WalletOptions />;
 }
 
