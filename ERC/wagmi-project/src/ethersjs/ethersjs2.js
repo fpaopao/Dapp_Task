@@ -1,5 +1,5 @@
-import {useState, useEffect} from 'react';
-import {ethers} from 'ethers';
+import { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 
 const LOCAL_RPC_URL = 'http://localhost:5777'; // 本地开发链地址
 const OWER_URL = "0x4265ead2BdDFF1fA27703210Ac72E33827bAa48e";
@@ -126,9 +126,9 @@ export default function WalletConnector2() {
   return (
     <div>
       <button onClick={() => getData()}>getData</button>
-      <br/>
+      <br />
       <button onClick={() => transferPipe()}>转账流程</button>
-      <br/>
+      <br />
       <button onClick={() => weituo()}>授权与委托转账流程</button>
 
 

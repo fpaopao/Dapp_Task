@@ -1,10 +1,10 @@
-import {http, createConfig} from 'wagmi'
-import {base, mainnet, optimism} from 'wagmi/chains'
-import {injected, metaMask, safe, walletConnect} from 'wagmi/connectors'
+import { createConfig, http } from 'wagmi'
+import { base, mainnet } from 'wagmi/chains'
+import { injected, metaMask, safe, walletConnect } from 'wagmi/connectors'
 
 import { defineChain } from 'viem'
 
-const ganacheChain = defineChain({
+export const ganacheChain = defineChain({
     id: 1337,
     name: 'Ganache',
     nativeCurrency: {
@@ -19,16 +19,17 @@ const ganacheChain = defineChain({
     }
 })
 
-const projectId = '0x4265ead2BdDFF1fA27703210Ac72E33827bAa48e';
+const projectId = '';//需要官网申请
 
 export const config = createConfig({
-    chains: [mainnet, base,ganacheChain],
+    chains: [mainnet, base, ganacheChain],
     connectors: [
         injected(),
-        walletConnect({projectId}),
+        walletConnect({ projectId }),
         metaMask(),
         safe(),
     ],
+    ssr: true,
     transports: {
         [mainnet.id]: http(),
         [base.id]: http(),
