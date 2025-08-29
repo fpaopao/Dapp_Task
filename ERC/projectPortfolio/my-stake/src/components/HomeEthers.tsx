@@ -1,13 +1,15 @@
 import styles from "@/styles/home.module.css"
-import { formatUnits, parseUnits } from "viem";
-import React, { useEffect, useState } from 'react';
+import { formatUnits, formatEther, parseEther, parseUnits } from "viem";
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount, useBalance } from 'wagmi';
-import { useStakingContract } from '@/contracts/stakingContract';
 import toast from 'react-hot-toast';
+import { getUserStake, optionsConfig, stake, getWriteOptions } from "@/contracts/stakingContractEthers.ts"
 
 export default function Home() {
   const { isConnected, address } = useAccount();
   const [amount, setAmount] = useState('');
+  const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState(false)
   const { data: balance } = useBalance({
     address: address,
     query: {
@@ -17,23 +19,21 @@ export default function Home() {
     }
   });
 
-  const {
-    useUserStake,
-    stakeDepositETH,
-    status,
-    isPending,
-    isConfirming,
-    isConfirmed,
-    error,
-    hash
-  } = useStakingContract();
+  const getUserStakeAccount = useCallback(async () => {
+    if (!address) return;
+    const network = await optionsConfig.provider.getNetwork();
+    const res = await getUserStake(optionsConfig, address);
+    if (res) {
+      console.log("🚀 ~ getUserStakeAccount ~ res:", res)
+      setCount(formatUnits(res, 18))
+    }
+  }, [address]);
 
-  const {
-    data: userStake,
-    isLoading: stakeLoading,
-    error: stakeError,
-    refetch: refetchStake,
-  } = useUserStake(address, { watch: true });
+  useEffect(() => {
+    if (isConnected && address) {
+      getUserStakeAccount();
+    }
+  }, [isConnected, address, getUserStakeAccount]);
 
   const stakeSendBtn = async () => {
     try {
@@ -43,22 +43,28 @@ export default function Home() {
         toast.error("余额不足");
         return
       }
-      const result = await stakeDepositETH(parseUnits(amount, 18));
+      setLoading(true)
+      // 获取写入配置
+      const writeOptions = await getWriteOptions();
+      const res = await stake(writeOptions, parseUnits(amount, 18))
+      if (res.hash) {
+        await res.wait(); // 
+        getUserStakeAccount()
+        toast.success('操作成功！');
+        setLoading(false)
+        setAmount("")
+      }
     } catch (e) {
-
+      toast.error('操作失败');
+    } finally {
+      setLoading(false)
     }
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await refetchStake();
-    };
-    if (isConfirmed) {
-      toast.success('操作成功！');
-      fetchData()
-      setAmount("");
-    }
-  }, [isPending, isConfirming, isConfirmed])
+  if (!isConnected) {
+    return;
+  }
+
 
 
   return (
@@ -66,9 +72,7 @@ export default function Home() {
       <h1 className="text-4xl md:text-5xl font-bold text-blue-700 mb-6">
         stake
         <div>
-          {/* <h3 onClick={() => { test() }}>测试</h3>
-          <h3 onClick={() => { addTest() }}>addTest</h3> */}
-          <p>stakedAmount:{userStake && formatUnits(userStake, 18)}ETH</p>
+          <p>stakedAmount:{parseFloat(count).toFixed(4)}ETH</p>
         </div>
       </h1>
 
@@ -83,9 +87,9 @@ export default function Home() {
           <button
             onClick={stakeSendBtn}
             className={styles.button}
-            disabled={isPending || isConfirming || !amount}
+            disabled={loading}
           >
-            {isPending || isConfirming ? '处理中...' : '质押'}
+            {loading ? '处理中...' : '质押'}
           </button>
         </div>
       </div>

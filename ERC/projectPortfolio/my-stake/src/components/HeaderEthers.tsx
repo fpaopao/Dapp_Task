@@ -26,8 +26,8 @@ const Header = () => {
 
   // 导航菜单项
   const navItems = [
-    {id: "home", name: "Stake", href: "/"},
-    {id: "withdraw", name: "Withdraw", href: "/withdraw"},
+    {id: "home", name: "Stake", href: "/ethers"},
+    {id: "withdraw", name: "Withdraw22", href: "/ethers/withdraw"},
   ];
 
   return (

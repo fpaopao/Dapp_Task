@@ -1,4 +1,4 @@
-export const stakeAbi = [
+export const STAKING_ABI = [
   {
     "inputs": [],
     "name": "AccessControlBadConfirmation",

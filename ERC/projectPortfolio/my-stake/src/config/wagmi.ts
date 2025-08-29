@@ -11,9 +11,10 @@ export const config = getDefaultConfig({
     sepolia
   ],
   transports: {
-    [sepolia.id]: http('https://eth-sepolia.public.blastapi.io')
+    [sepolia.id]: http('https://eth-sepolia.api.onfinality.io/public')
   },
   ssr: true,
 });
 
 export const defaultChainId: number = sepolia.id
+export const rpcUrl = "https://eth-sepolia.api.onfinality.io/public"

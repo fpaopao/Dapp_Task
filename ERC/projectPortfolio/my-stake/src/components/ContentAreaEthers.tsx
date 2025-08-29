@@ -1,17 +1,19 @@
 "use client";
 import { usePathname } from "next/navigation";
-import Home from "@/components/Home"
-import Withdraw from "@/components/Withdraw"
+import HomeEthers from "@/components/HomeEthers"
+import WithdrawEthers from "@/components/WithdrawEthers"
 const ContentArea = () => {
   const pathname = usePathname();
 
   // 根据路径显示不同内容
   const getContent = () => {
     switch (pathname) {
-      case "/withdraw":
-        return <Withdraw/>
+      case "/ethers/withdraw":
+        return <WithdrawEthers />
+      case "/ethers":
+        return <HomeEthers />
       default: // 首页
-        return <Home />
+        return null
     }
   };
 
