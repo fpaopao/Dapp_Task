@@ -7,11 +7,6 @@ export interface ContractWriteResult {
   data?: any;
 }
 
-export interface StakingParams {
-  amount: bigint;
-  stakingPeriod?: number;
-}
-
 export interface ContractConfig {
   address: Address;
   abi: any[];
@@ -23,8 +18,6 @@ export interface ReadOptions {
   cacheTime?: number;
   staleTime?: number;
 }
-
-
 
 
 
@@ -46,12 +39,4 @@ export interface ReadContractConfig {
   watch?: boolean;
   cacheTime?: number;
   staleTime?: number;
-}
-
-export interface StakingInfo {
-  userStake: bigint;
-  totalStaked: bigint;
-  rewards: bigint;
-  stakingPeriod: number;
-  isStaking: boolean;
 }

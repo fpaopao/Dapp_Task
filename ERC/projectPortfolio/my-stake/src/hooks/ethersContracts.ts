@@ -58,20 +58,3 @@ export async function writeContract(
     throw new Error(`Failed to execute ${methodName} on contract: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
-
-// 获取签名者
-export async function getSigner(provider: ethers.BrowserProvider): Promise<ethers.Signer> {
-   // 如果是 JsonRpcProvider，无法直接获取签名者，需要抛出错误或特殊处理
-  if (provider instanceof ethers.JsonRpcProvider) {
-    throw new Error("JsonRpcProvider cannot provide a signer. Use BrowserProvider for write operations.");
-  }
-  
-  // 请求账户访问
-  await (provider as ethers.BrowserProvider).send("eth_requestAccounts", []);
-  return (provider as ethers.BrowserProvider).getSigner()
-}
-
-// 获取默认network
-export function getDefaultProvider(network: string = 'mainnet'): ethers.JsonRpcProvider {
-  return new ethers.JsonRpcProvider(rpcUrl);
-}

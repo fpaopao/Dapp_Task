@@ -3,7 +3,10 @@ import { formatUnits, formatEther, parseEther, parseUnits } from "viem";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import toast from 'react-hot-toast';
-import { getUserStake, optionsConfig, stake, getWriteOptions } from "@/contracts/stakingContractEthers.ts"
+import { getUserStake, optionsConfig, stake, optionConfigWrite } from "@/contracts/stakingContractEthers.ts"
+
+import { useEthersProvider } from '@/hooks/ethersProvider'
+import { useEthersSigner } from "@/hooks/ethersSigner"
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -18,15 +21,21 @@ export default function Home() {
       refetchIntervalInBackground: false,
     }
   });
+  const provider = useEthersProvider()
+  const signer = useEthersSigner()
 
   const getUserStakeAccount = useCallback(async () => {
     if (!address) return;
-    const network = await optionsConfig.provider.getNetwork();
-    const res = await getUserStake(optionsConfig, address);
-    if (res) {
-      console.log("🚀 ~ getUserStakeAccount ~ res:", res)
-      setCount(formatUnits(res, 18))
+    if (provider) {
+      optionsConfig.provider = provider;
+      const network = await optionsConfig.provider.getNetwork();
+      const res = await getUserStake(optionsConfig, address);
+      if (res) {
+        console.log("🚀 ~ getUserStakeAccount ~ res:", res)
+        setCount(formatUnits(res, 18))
+      }
     }
+
   }, [address]);
 
   useEffect(() => {
@@ -45,15 +54,20 @@ export default function Home() {
       }
       setLoading(true)
       // 获取写入配置
-      const writeOptions = await getWriteOptions();
-      const res = await stake(writeOptions, parseUnits(amount, 18))
-      if (res.hash) {
-        await res.wait(); // 
-        getUserStakeAccount()
-        toast.success('操作成功！');
-        setLoading(false)
-        setAmount("")
+
+      if (provider && signer) {
+        optionConfigWrite.provider = provider;
+        optionConfigWrite.signer = signer;
+        const res = await stake(optionConfigWrite, parseUnits(amount, 18))
+        if (res.hash) {
+          await res.wait(); // 
+          getUserStakeAccount()
+          toast.success('操作成功！');
+          setLoading(false)
+          setAmount("")
+        }
       }
+
     } catch (e) {
       toast.error('操作失败');
     } finally {

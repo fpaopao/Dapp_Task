@@ -3,7 +3,10 @@ import { formatUnits, parseUnits } from "viem";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import toast from 'react-hot-toast';
-import { optionsConfig, getStakingBalance, getWithdrawAmount, unStake, getWriteOptions,setWithdraw } from "@/contracts/stakingContractEthers.ts"
+import { optionsConfig, getStakingBalance, getWithdrawAmount, unStake, optionConfigWrite, setWithdraw } from "@/contracts/stakingContractEthers.ts"
+
+import { useEthersProvider } from '@/hooks/ethersProvider'
+import { useEthersSigner } from "@/hooks/ethersSigner"
 
 
 export type UserStakeData = {
@@ -19,6 +22,8 @@ const InitData: UserStakeData = {
 };
 
 export default function WithDraw() {
+  const provider = useEthersProvider()
+  const signer = useEthersSigner()
   const { isConnected, address } = useAccount();
   const [userData, setUserData] = useState<UserStakeData>(InitData);
   const [unstakeLoading, setUnstakeLoading] = useState(false);
@@ -28,20 +33,24 @@ export default function WithDraw() {
 
   const getStakingBalanceF = useCallback(async () => {
     if (!address) return;
-    const network = await optionsConfig.provider.getNetwork();
-    const res = await getStakingBalance(optionsConfig, address);
-    const res2 = await getWithdrawAmount(optionsConfig, address)
-    if (res && res2) {
-      const requestAmount = res2 && res2[0];
-      const pendingWithdrawAmount = res2 && res2[1];
-      const ava = Number(pendingWithdrawAmount && formatUnits(pendingWithdrawAmount, 18));
-      const total = Number(requestAmount && formatUnits(requestAmount, 18));
-      setUserData({
-        staked: formatUnits(res as bigint, 18),
-        withdrawPending: (total - ava).toFixed(4),
-        withdrawable: ava.toString()
-      });
+    if (provider) {
+      optionsConfig.provider = provider;
+      const network = await optionsConfig.provider.getNetwork();
+      const res = await getStakingBalance(optionsConfig, address);
+      const res2 = await getWithdrawAmount(optionsConfig, address)
+      if (res && res2) {
+        const requestAmount = res2 && res2[0];
+        const pendingWithdrawAmount = res2 && res2[1];
+        const ava = Number(pendingWithdrawAmount && formatUnits(pendingWithdrawAmount, 18));
+        const total = Number(requestAmount && formatUnits(requestAmount, 18));
+        setUserData({
+          staked: formatUnits(res as bigint, 18),
+          withdrawPending: (total - ava).toFixed(4),
+          withdrawable: ava.toString()
+        });
+      }
     }
+
 
   }, [address]);
 
@@ -66,16 +75,19 @@ export default function WithDraw() {
 
     try {
       setUnstakeLoading(true)
-      // 获取写入配置
-      const writeOptions = await getWriteOptions();
-      const res = await unStake(writeOptions, parseUnits(unstakeAccount, 18))
-      if (res.hash) {
-        await res.wait(); // 
-        getStakingBalanceF()
-        toast.success('操作成功！');
-        setUnstakeLoading(false)
-        setUnstakeAccount("")
+      if (provider && signer) {
+        optionConfigWrite.provider = provider;
+        optionConfigWrite.signer = signer;
+        const res = await unStake(optionConfigWrite, parseUnits(unstakeAccount, 18))
+        if (res.hash) {
+          await res.wait(); // 
+          getStakingBalanceF()
+          toast.success('操作成功！');
+          setUnstakeLoading(false)
+          setUnstakeAccount("")
+        }
       }
+
     } catch (error) {
 
     }
@@ -83,18 +95,22 @@ export default function WithDraw() {
 
 
   const widthdrawBtn = useCallback(async () => {
-    
+
     try {
       setWithdrawLoading(true)
-      // 获取写入配置
-      const writeOptions = await getWriteOptions();
-      const res = await setWithdraw(writeOptions)
-      if (res.hash) {
-        await res.wait(); // 
-        getStakingBalanceF()
-        toast.success('操作成功！');
-        setWithdrawLoading(false)
+      if (provider && signer) {
+        optionConfigWrite.provider = provider;
+        optionConfigWrite.signer = signer;
+        const res = await setWithdraw(optionConfigWrite)
+        if (res.hash) {
+          await res.wait(); // 
+          getStakingBalanceF()
+          toast.success('操作成功！');
+          setWithdrawLoading(false)
+        }
+
       }
+
     } catch (error) {
 
     }

@@ -4,9 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { useStakingContract } from '@/contracts/stakingContract';
 import toast from 'react-hot-toast';
+import { STAKING_ABI } from '@/contracts/abi';
+import { writeContract, waitForTransactionReceipt } from '@wagmi/core'
+import { config as configWagmi } from "@/config/wagmi"
+
+import { tokenAddress } from "@/config/wagmi";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
+  const [isLoading,setIsLoading] = useState(false)
   const [amount, setAmount] = useState('');
   const { data: balance } = useBalance({
     address: address,
@@ -19,19 +25,10 @@ export default function Home() {
 
   const {
     useUserStake,
-    stakeDepositETH,
-    status,
-    isPending,
-    isConfirming,
-    isConfirmed,
-    error,
-    hash
   } = useStakingContract();
 
   const {
     data: userStake,
-    isLoading: stakeLoading,
-    error: stakeError,
     refetch: refetchStake,
   } = useUserStake(address, { watch: true });
 
@@ -43,22 +40,38 @@ export default function Home() {
         toast.error("余额不足");
         return
       }
-      const result = await stakeDepositETH(parseUnits(amount, 18));
+      setIsLoading(true)
+      // 使用 writeContract 发送交易
+      const hash = await writeContract(configWagmi, {
+        address: tokenAddress,
+        abi: STAKING_ABI,
+        functionName: 'depositETH', // 要调用的函数名
+        args: [], // 如果函数需要参数，在此传入
+        value: parseUnits(amount, 18)
+      });
+      // 使用 waitForTransactionReceipt 等待交易确认
+      const receipt = await waitForTransactionReceipt(configWagmi, {
+        hash: hash, // 传入交易哈希
+        timeout: 120_000, // 可选：设置超时（毫秒）
+        pollingInterval: 2_000, // 可选：设置轮询间隔（毫秒）
+        // 重试策略：对于已上链的交易（无论成功失败），重试没有意义
+        // retry: false 
+      });
+
+      console.log("🚀 ~ stakeSendBtn ~ receipt:", receipt)
+      if(receipt.status = "success"){
+        setIsLoading(false)
+        toast.success("成功");
+        await refetchStake()
+        setAmount("");
+      }else{
+        toast.error("失败");
+      }
+      // const result = await stakeDepositETH(parseUnits(amount, 18));
     } catch (e) {
 
     }
   }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await refetchStake();
-    };
-    if (isConfirmed) {
-      toast.success('操作成功！');
-      fetchData()
-      setAmount("");
-    }
-  }, [isPending, isConfirming, isConfirmed])
 
 
   return (
@@ -66,8 +79,6 @@ export default function Home() {
       <h1 className="text-4xl md:text-5xl font-bold text-blue-700 mb-6">
         stake
         <div>
-          {/* <h3 onClick={() => { test() }}>测试</h3>
-          <h3 onClick={() => { addTest() }}>addTest</h3> */}
           <p>stakedAmount:{userStake && formatUnits(userStake, 18)}ETH</p>
         </div>
       </h1>
@@ -83,9 +94,9 @@ export default function Home() {
           <button
             onClick={stakeSendBtn}
             className={styles.button}
-            disabled={isPending || isConfirming || !amount}
+            disabled={isLoading}
           >
-            {isPending || isConfirming ? '处理中...' : '质押'}
+            {isLoading ? '处理中...' : '质押'}
           </button>
         </div>
       </div>

@@ -28,17 +28,6 @@ export const useContractRead = <T = any>(
     },
   });
 
-  // 自动监听区块变化
-  useEffect(() => {
-    if (options.watch && isConnected) {
-      const interval = setInterval(() => {
-        refetch();
-      }, 15000); // 每15秒刷新一次
-
-      return () => clearInterval(interval);
-    }
-  }, [options.watch, isConnected, refetch]);
-
   const formattedError = useMemo(() => {
     if (error) {
       return handleContractError(error);
@@ -66,7 +55,7 @@ export const useContractRead = <T = any>(
     status: formattedStatus,
   };
 };
-
+// 无用-------------------------------------------------------------------------------------
 // 便捷 Hook：带自动重试的读取
 export const useContractReadWithRetry = <T = any>(
   config: ReadContractConfig,

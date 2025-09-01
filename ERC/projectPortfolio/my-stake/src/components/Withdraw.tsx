@@ -4,7 +4,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { useStakingContract } from '@/contracts/stakingContract';
 import toast from 'react-hot-toast';
-
+import { STAKING_ABI } from '@/contracts/abi';
+import { writeContract, waitForTransactionReceipt } from '@wagmi/core'
+import { config as configWagmi } from "@/config/wagmi"
+import { tokenAddress } from "@/config/wagmi";
 
 export type UserStakeData = {
   staked: string;
@@ -46,18 +49,18 @@ export default function WithDraw() {
   const pendingWithdrawAmount = data && data[1];
   const ava = Number(pendingWithdrawAmount && formatUnits(pendingWithdrawAmount, 18));
   const total = Number(requestAmount && formatUnits(requestAmount, 18));
+  const fetchData = async () => {
+    console.log(111)
+    const result = await refetch();
+    setUserData({
+      staked: formatUnits(staked as bigint, 18),
+      withdrawPending: (total - ava).toFixed(4),
+      withdrawable: ava.toString()
+    });
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await refetch();
-      setUserData({
-        staked: formatUnits(staked as bigint, 18),
-        withdrawPending: (total - ava).toFixed(4),
-        withdrawable: ava.toString()
-      });
-    };
     fetchData();
-
-  }, [data, isConfirmed, status])
+  }, [data])
   // --------
   const unStakeSendBtn = useCallback(async () => {
     if (parseFloat(unstakeAccount) <= 0) {
@@ -70,44 +73,99 @@ export default function WithDraw() {
     }
 
     try {
-      const res = await unStake(parseUnits(unstakeAccount,18))
+      setUnstakeLoading(true)
+      // 使用 writeContract 发送交易
+      const hash = await writeContract(configWagmi, {
+        address: tokenAddress,
+        abi: STAKING_ABI,
+        functionName: 'unstake', // 要调用的函数名
+        args: [0, parseUnits(unstakeAccount, 18)], // 如果函数需要参数，在此传入
+      });
+      // 使用 waitForTransactionReceipt 等待交易确认
+      const receipt = await waitForTransactionReceipt(configWagmi, {
+        hash: hash, // 传入交易哈希
+        timeout: 120_000, // 可选：设置超时（毫秒）
+        pollingInterval: 2_000, // 可选：设置轮询间隔（毫秒）
+        // 重试策略：对于已上链的交易（无论成功失败），重试没有意义
+        // retry: false 
+      });
+
+      console.log("🚀 ~ stakeSendBtn ~ receipt:", receipt)
+      if (receipt.status = "success") {
+        setUnstakeLoading(false)
+        toast.success("成功");
+        await fetchData()
+        setUnstakeAccount("")
+      } else {
+        toast.error("失败");
+      }
     } catch (error) {
 
     }
   }, [unStake, userData.staked, unstakeAccount, status]);
 
+
+
+
+
   const widthdrawBtn = async () => {
     try {
-      const res = await withDrawEth();
+      // const res = await withDrawEth();
+      setWithdrawLoading(true)
+      // 使用 writeContract 发送交易
+      const hash = await writeContract(configWagmi, {
+        address: tokenAddress,
+        abi: STAKING_ABI,
+        functionName: 'withdraw', // 要调用的函数名
+        args: [0], // 如果函数需要参数，在此传入
+      });
+      // 使用 waitForTransactionReceipt 等待交易确认
+      const receipt = await waitForTransactionReceipt(configWagmi, {
+        hash: hash, // 传入交易哈希
+        timeout: 120_000, // 可选：设置超时（毫秒）
+        pollingInterval: 2_000, // 可选：设置轮询间隔（毫秒）
+        // 重试策略：对于已上链的交易（无论成功失败），重试没有意义
+        // retry: false 
+      });
+
+      console.log("🚀 ~ stakeSendBtn ~ receipt:", receipt)
+      if (receipt.status = "success") {
+        setWithdrawLoading(false)
+        toast.success("成功");
+        await fetchData()
+        // setUnstakeAccount("")
+      } else {
+        toast.error("失败");
+      }
     } catch (error) {
 
     }
   }
 
 
-  useEffect(() => {
-    if (isConfirmed && status == "success") {
-      toast.success('操作成功！');
-      if (id == "unstakeId") {
-        setUnstakeLoading(false)
-        setUnstakeAccount("")
-      }
-      if (id == "withDrawEthId") {
-        setWithdrawLoading(false)
-      }
+  // useEffect(() => {
+  //   if (isConfirmed && status == "success") {
+  //     toast.success('操作成功！');
+  //     if (id == "unstakeId") {
+  //       setUnstakeLoading(false)
+  //       setUnstakeAccount("")
+  //     }
+  //     if (id == "withDrawEthId") {
+  //       setWithdrawLoading(false)
+  //     }
 
 
-    } else {
-      if (id == "unstakeId") {
-        setUnstakeLoading(true)
-      }
-      if (id == "withDrawEthId") {
-        setWithdrawLoading(true)
-      }
+  //   } else {
+  //     if (id == "unstakeId") {
+  //       setUnstakeLoading(true)
+  //     }
+  //     if (id == "withDrawEthId") {
+  //       setWithdrawLoading(true)
+  //     }
 
 
-    }
-  }, [isPending, isConfirming, isConfirmed, status])
+  //   }
+  // }, [isPending, isConfirming, isConfirmed, status])
 
 
   return (

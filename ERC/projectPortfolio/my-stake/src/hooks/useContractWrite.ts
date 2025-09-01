@@ -2,15 +2,17 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { useState, useEffect, useCallback } from 'react';
 import { ContractWriteResult, ContractConfig } from '../contracts/types';
 import { handleContractError } from '../utils/errorHandler';
+import { waitForTransactionReceipt } from '@wagmi/core'
+import { config as configWagmi } from "@/config/wagmi"
 
 export const useContractWrite = (config: ContractConfig) => {
   const { isConnected } = useAccount();
   const { writeContract, data: hash, error, isPending } = useWriteContract();
   const [status, setStatus] = useState<ContractWriteResult['status']>('idle');
   const [result, setResult] = useState<any>(null);
-  const [id,setId] = useState("")
+  const [id, setId] = useState("")
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash }); 
 
   const executeWrite = useCallback(async (
     id: string,

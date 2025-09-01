@@ -1,35 +1,22 @@
 import { BrowserProvider, ethers } from 'ethers';
 import { readContract, writeContract, ReadOptions, WriteOptions } from '@/hooks/ethersContracts';
 import { STAKING_ABI } from './abi';
-import { getDefaultProvider, getSigner } from "@/hooks/ethersContracts"
 
 // 合约地址 (请替换为实际地址)
 export const META_NODE_STAK_ADDRESS = "0x4104b3D5F60D682a51Bd7d33e467249F10727263";
-// new ethers.BrowserProvider(window.ethereum),
-const providerSepolia = getDefaultProvider('sepolia');
 
 // 读取配置
 export const optionsConfig = {
-  provider:providerSepolia,
+  provider:null,
   contractAddress: META_NODE_STAK_ADDRESS,
   contractABI: STAKING_ABI
 }
 
-// 写入配置需要在有浏览器环境时动态创建
-export async function getWriteOptions(): Promise<WriteOptions> {
-  if (typeof window === 'undefined' || !window.ethereum) {
-    throw new Error("Browser environment with Ethereum provider is required for write operations");
-  }
-  
-  const browserProvider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await browserProvider.getSigner();
-  
-  return {
-    provider: browserProvider,
+export const optionConfigWrite = {
+   provider: null,
     contractAddress: META_NODE_STAK_ADDRESS,
     contractABI: STAKING_ABI,
-    signer: signer
-  };
+    signer: null
 }
 
 // 读取用户质押金额
