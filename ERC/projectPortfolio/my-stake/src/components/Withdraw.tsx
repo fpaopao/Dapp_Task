@@ -4,10 +4,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { useStakingContract } from '@/contracts/stakingContract';
 import toast from 'react-hot-toast';
-import { STAKING_ABI } from '@/contracts/abi';
 import { writeContract, waitForTransactionReceipt } from '@wagmi/core'
 import { config as configWagmi } from "@/config/wagmi"
-import { tokenAddress } from "@/config/wagmi";
+import { STAKING_CONTRACT_CONFIG } from "@/contracts/stakingContract";
+
 
 export type UserStakeData = {
   staked: string;
@@ -45,10 +45,10 @@ export default function WithDraw() {
   const { data, isLoading, isError, error, refetch } = useUserWithdrawAmount(address, { watch: true });
   const res2 = useUserStakingBalance(address, { watch: true })
   const staked = res2.data ? res2.data : '';
-  const requestAmount = data && data[0];
-  const pendingWithdrawAmount = data && data[1];
-  const ava = Number(pendingWithdrawAmount && formatUnits(pendingWithdrawAmount, 18));
-  const total = Number(requestAmount && formatUnits(requestAmount, 18));
+  const requestAmount = Array.isArray(data) ? data[0] : undefined;
+  const pendingWithdrawAmount = Array.isArray(data) ? data[1] : undefined;
+  const ava = Number(pendingWithdrawAmount !== undefined ? formatUnits(pendingWithdrawAmount, 18) : 0);
+  const total = Number(requestAmount !== undefined ? formatUnits(requestAmount, 18) : 0);
   const fetchData = async () => {
     console.log(111)
     const result = await refetch();
@@ -76,21 +76,17 @@ export default function WithDraw() {
       setUnstakeLoading(true)
       // 使用 writeContract 发送交易
       const hash = await writeContract(configWagmi, {
-        address: tokenAddress,
-        abi: STAKING_ABI,
+        ...STAKING_CONTRACT_CONFIG,
         functionName: 'unstake', // 要调用的函数名
         args: [0, parseUnits(unstakeAccount, 18)], // 如果函数需要参数，在此传入
       });
       // 使用 waitForTransactionReceipt 等待交易确认
       const receipt = await waitForTransactionReceipt(configWagmi, {
-        hash: hash, // 传入交易哈希
-        timeout: 120_000, // 可选：设置超时（毫秒）
-        pollingInterval: 2_000, // 可选：设置轮询间隔（毫秒）
-        // 重试策略：对于已上链的交易（无论成功失败），重试没有意义
-        // retry: false 
+        hash: hash,
+        timeout: 120_000,
+        pollingInterval: 2_000,
       });
 
-      console.log("🚀 ~ stakeSendBtn ~ receipt:", receipt)
       if (receipt.status = "success") {
         setUnstakeLoading(false)
         toast.success("成功");
@@ -105,17 +101,12 @@ export default function WithDraw() {
   }, [unStake, userData.staked, unstakeAccount, status]);
 
 
-
-
-
   const widthdrawBtn = async () => {
     try {
-      // const res = await withDrawEth();
       setWithdrawLoading(true)
       // 使用 writeContract 发送交易
       const hash = await writeContract(configWagmi, {
-        address: tokenAddress,
-        abi: STAKING_ABI,
+        ...STAKING_CONTRACT_CONFIG,
         functionName: 'withdraw', // 要调用的函数名
         args: [0], // 如果函数需要参数，在此传入
       });

@@ -1,8 +1,8 @@
-import { Address } from 'viem';
+import { Address } from "viem";
 
 export interface ContractWriteResult {
   hash?: string;
-  status: 'success' | 'error' | 'loading' | 'idle';
+  status: "success" | "error" | "loading" | "idle";
   error?: Error | null;
   data?: any;
 }
@@ -19,15 +19,13 @@ export interface ReadOptions {
   staleTime?: number;
 }
 
-
-
 export interface ContractReadResult<T = any> {
   data: T | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
   refetch: () => void;
-  status: 'success' | 'error' | 'loading' | 'idle';
+  status: "success" | "error" | "loading" | "idle";
 }
 
 export interface ReadContractConfig {
