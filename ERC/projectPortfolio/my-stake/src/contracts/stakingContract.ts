@@ -5,8 +5,6 @@ import { ContractConfig, ReadOptions } from './types';
 import { Address } from 'viem';
 // 合约地址
 import { tokenAddress } from "@/config/wagmi";
-export const tokenAddress = "0x4104b3D5F60D682a51Bd7d33e467249F10727263";
-export const walletAddress = "0x3623843CB3685FDF05a808c4088b0AAFCB54d33a"
 
 const STAKING_CONTRACT_CONFIG: ContractConfig = {
   address: tokenAddress, // 合约地址
