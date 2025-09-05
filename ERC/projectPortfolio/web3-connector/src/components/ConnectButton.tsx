@@ -15,7 +15,7 @@ export interface ConnectButtonProps {
   label?: string;
   className?: string;
   showBalance?: boolean;
-  walletConnectors: array;
+  walletConnectors: Array<any>;
   customButton?: CustomButtonProps;
 }
 

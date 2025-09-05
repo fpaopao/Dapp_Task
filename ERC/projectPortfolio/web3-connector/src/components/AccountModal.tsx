@@ -9,15 +9,7 @@ import Modal from "./ui/Modal";
 interface AccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletConnectors: WalletConnector[];
-}
-
-// 钱包连接器类型
-interface WalletConnector {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
+  walletConnectors: Array<any>;
 }
 
 export default function AccountModal({ isOpen, onClose ,walletConnectors}: AccountModalProps) {
