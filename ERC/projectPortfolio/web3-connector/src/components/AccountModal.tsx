@@ -9,6 +9,7 @@ import Modal from "./ui/Modal";
 interface AccountModalProps {
   isOpen: boolean;
   onClose: () => void;
+  walletConnectors: WalletConnector[];
 }
 
 // 钱包连接器类型
@@ -19,33 +20,12 @@ interface WalletConnector {
   description: string;
 }
 
-export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
+export default function AccountModal({ isOpen, onClose ,walletConnectors}: AccountModalProps) {
   const { isConnected, address, connect, connectors, disconnect, balance } =
     useWeb3();
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedConnector, setSelectedConnector] = useState<any>(null);
 
-  // 可用的钱包连接器
-  const walletConnectors: WalletConnector[] = [
-    {
-      id: "metaMaskSDK",
-      name: "MetaMask",
-      icon: "fab fa-ethereum",
-      description: "浏览器扩展钱包",
-    },
-    {
-      id: "coinbaseWallet",
-      name: "Coinbase Wallet",
-      icon: "fas fa-dollar-sign",
-      description: "移动端和扩展钱包",
-    },
-    {
-      id: "walletConnect",
-      name: "WalletConnect",
-      icon: "fas fa-qrcode",
-      description: "二维码连接",
-    },
-  ];
 
   // 处理钱包连接
   const handleConnect = async (connector: any) => {
@@ -84,8 +64,6 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
       {!isConnected ? (
         // 未连接状态 - 显示钱包连接器列表
         <div className="space-y-4">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">连接钱包</p>
-
           <div className="space-y-3">
             {connectors.map((connector) => {
               const walletInfo = walletConnectors.find(
@@ -133,7 +111,7 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
             <p className="font-medium">
               {typeof balance == "undefined"
                 ? 0
-                : parseFloat(balance?.formatted).toFixed(4)}{" "}
+                : parseFloat(balance?.formatted).toFixed(4)}
               ETH
             </p>
           </div>

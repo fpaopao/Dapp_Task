@@ -1,4 +1,3 @@
-// src/components/NetworkSwitcher.tsx
 "use client";
 
 import { useWeb3 } from "../hooks/useWeb3";
