@@ -4,6 +4,8 @@ import { useWeb3 } from "@/hooks/useWeb3";
 import { useEffect, useState } from "react";
 import AccountModal from "./AccountModal";
 import Button from "./ui/Button";
+import { useDynamicWallets } from '@/hooks/useDynamicWallets';
+import { shortenAddress } from '@/config/walletUtils';
 
 export interface CustomButtonProps {
   component?: React.ReactNode;
@@ -15,7 +17,6 @@ export interface ConnectButtonProps {
   label?: string;
   className?: string;
   showBalance?: boolean;
-  walletConnectors: Array<any>;
   customButton?: CustomButtonProps;
 }
 
@@ -23,11 +24,11 @@ export default function ConnectButton({
   label = "Connect Wallet",
   className = "",
   showBalance = true,
-  walletConnectors = [],
   customButton,
 }: ConnectButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isConnected, address, balance } = useWeb3();
+  const { wallets } = useDynamicWallets();
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function ConnectButton({
         <AccountModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          walletConnectors={walletConnectors}
+          walletConnectors={wallets}
         />
       </>
     );
@@ -100,7 +101,7 @@ export default function ConnectButton({
       <AccountModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        walletConnectors={walletConnectors}
+        walletConnectors={wallets}
       />
     </>
   );

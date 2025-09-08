@@ -1,0 +1,9 @@
+1。已安装钱包注入到ethereum 的对象中，为什么有的是找不到的。查资料是说有的，window.ethereum.isCoinbaseWalle，okxWallet 这俩一直没有。
+然后就更改为：(window as any).okxwallet；(window as any).coinbaseWalletExtension。这样取值对不对。
+有没有类似一个api获取所有的。
+-------------------------------------------------------
+
+2。ethereum.providers具体啥时候会有，安装了metaMask和Coinbase Walle应该就有数据吧，目前看着一直没有。
+----------------------------------------------------------
+
+3.EIP-6963标准现在用的多吗，查着目前有些可能尚未实现该标准

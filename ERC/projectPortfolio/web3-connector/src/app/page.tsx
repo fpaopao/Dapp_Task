@@ -11,28 +11,6 @@ interface WalletConnector {
 }
 
 export default function Home() {
-  // 可用的钱包连接器
-  const walletConnectors: WalletConnector[] = [
-    {
-      id: "metaMaskSDK",
-      name: "MetaMask",
-      icon: "fab fa-ethereum",
-      description: "浏览器扩展钱包",
-    },
-    {
-      id: "coinbaseWallet",
-      name: "Coinbase Wallet",
-      icon: "fas fa-dollar-sign",
-      description: "移动端和扩展钱包",
-    },
-    {
-      id: "walletConnect",
-      name: "WalletConnect",
-      icon: "fas fa-qrcode",
-      description: "二维码连接",
-    },
-  ];
-
   const customButton = {
     component: (
       <div className="flex items-center space-x-2 cursor-pointer">
@@ -53,11 +31,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Web3 Connector</h1>
-        <ConnectButton className="ceshi" walletConnectors={walletConnectors} />
-        {/* <ConnectButton className="ceshi" label="链接钱包" showBalance={false}walletConnectors={walletConnectors}/> */}
+        {/* <h1 className="text-2xl font-bold mb-6 text-center">Web3 Connector</h1> */}
+        <ConnectButton className="ceshi" />
+        {/* <ConnectButton className="ceshi" label="链接钱包" showBalance={false}/> */}
         {/* <ConnectButton
-          walletConnectors={walletConnectors}
           customButton={customButton}
         /> */}
       </div>
