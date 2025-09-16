@@ -1,22 +1,37 @@
-// Pool 页面
-import WtfLayout from "@/components/WtfLayout";
-import Link from "next/link";
 import React from "react";
-import {Flex, Table, Space, Typography, Button} from "antd";
-import styles from "./pool.module.css"
-import AddPoolModal from "@/components/AddPoolModal";
+import {Flex, Table, Space, Typography, Button, message} from "antd";
 import type {TableProps} from "antd";
+import WtfLayout from "@/components/WtfLayout";
+import AddPoolModal from "@/components/AddPoolModal";
+import Link from "next/link";
 
-const columns = [
+import {getContractAddress} from "@/utils/common";
+import {
+  useReadPoolManagerGetAllPools,
+  useWritePoolManagerCreateAndInitializePoolIfNecessary,
+} from "@/utils/contracts";
+
+import styles from "./pool.module.css";
+
+const columns: TableProps["columns"] = [
+  {
+    title: "Pool",
+    dataIndex: "pool",
+    key: "pool",
+    ellipsis: true,
+    fixed: "left",
+  },
   {
     title: "Token 0",
     dataIndex: "token0",
     key: "token0",
+    ellipsis: true,
   },
   {
     title: "Token 1",
     dataIndex: "token1",
     key: "token1",
+    ellipsis: true,
   },
   {
     title: "Index",
@@ -27,11 +42,6 @@ const columns = [
     title: "Fee",
     dataIndex: "fee",
     key: "fee",
-  },
-  {
-    title: "Fee Protocol",
-    dataIndex: "feeProtocol",
-    key: "feeProtocol",
   },
   {
     title: "Tick Lower",
@@ -49,66 +59,104 @@ const columns = [
     key: "tick",
   },
   {
+    title: "Liquidity",
+    dataIndex: "liquidity",
+    render: (value: bigint) => {
+      return value.toString();
+    },
+    key: "liquidity",
+  },
+  {
     title: "Price",
     dataIndex: "sqrtPriceX96",
     key: "sqrtPriceX96",
     render: (value: bigint) => {
       return value.toString();
     },
+    fixed: "right",
   },
 ];
 
-const TableList: React.FC = () => {
+const PoolListTable: React.FC = () => {
   const [openAddPoolModal, setOpenAddPoolModal] = React.useState(false);
-  const data = [
-    {
-      token0: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-      token1: "0xEcd0D12E21805803f70de03B72B1C162dB0898d9",
-      index: 0,
-      fee: 3000,
-      feeProtocol: 0,
-      tickLower: -100000,
-      tickUpper: 100000,
-      tick: 1000,
-      sqrtPriceX96: BigInt("7922737261735934252089901697281"),
-    },
-  ];
+  const [loading, setLoading] = React.useState(false);
+  console.log("🚀 ~ PoolListTable ~ getContractAddress(\"PoolManager\"): ", getContractAddress("PoolManager"));
+  const {data, refetch} = useReadPoolManagerGetAllPools({
+    address: getContractAddress("PoolManager"),
 
+  });
+  console.log("🚀 ~ PoolListTable ~ data: ", data);
+
+  const {writeContractAsync} = useWritePoolManagerCreateAndInitializePoolIfNecessary();
   return (
     <>
-      <Flex gap="middle" vertical>
-        <Flex align="center" gap="middle">
-          <Link href="/wtfswap/positions">
-            <Button>My Positions</Button>
-          </Link>
-          <Button type="primary" onClick={() => {
-            setOpenAddPoolModal(true);
-          }}>Add Pool</Button>
-        </Flex>
-        {/*<Table columns={columns} dataSource={data}/>*/}
-      </Flex>
+      <Table
+        rowKey="pool"
+        scroll={{x: "max-content"}}
+        title={() => (
+          <Flex justify="space-between">
+            <div>Pool List</div>
+            <Space>
+              <Link href="/wtfswap/positions">
+                <Button>My Positions</Button>
+              </Link>
+              <Button
+                type="primary"
+                loading={loading}
+                onClick={() => {
+                  setOpenAddPoolModal(true);
+                }}
+              >
+                Add Pool
+              </Button>
+            </Space>
+          </Flex>
+        )}
+        columns={columns}
+        dataSource={data}
+      />
       <AddPoolModal
         open={openAddPoolModal}
         onCancel={() => {
           setOpenAddPoolModal(false);
         }}
-        onCreatePool={(createPram) => {
-          console.log("get createPram", createPram);
+        onCreatePool={async (createParams) => {
+          console.log("get createParams", createParams);
+          setLoading(true);
           setOpenAddPoolModal(false);
+          try {
+            await writeContractAsync({
+              address: getContractAddress("PoolManager"),
+              args: [
+                {
+                  token0: createParams.token0,
+                  token1: createParams.token1,
+                  fee: createParams.fee,
+                  tickLower: createParams.tickLower,
+                  tickUpper: createParams.tickUpper,
+                  sqrtPriceX96: createParams.sqrtPriceX96,
+                },
+              ],
+            });
+            message.success("Create Pool Success If Necessary");
+            refetch();
+          } catch (error: any) {
+            message.error(error.message);
+          } finally {
+            setLoading(false);
+          }
         }}
       />
     </>
-  )
-}
-
+  );
+};
 
 export default function WtfswapPool() {
-
   return (
     <WtfLayout>
-      <div className={styles.tablebox}>
-        <Typography.Title level={2}>Pool List</Typography.Title>
-        <TableList/>
+      <div className={styles.container}>
+        <Typography.Title level={2}>Pool</Typography.Title>
+        <PoolListTable/>
       </div>
     </WtfLayout>
   );
