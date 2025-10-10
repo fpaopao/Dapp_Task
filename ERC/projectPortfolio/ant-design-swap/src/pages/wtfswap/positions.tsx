@@ -1,6 +1,6 @@
 import React from "react";
-import {Flex, Table, Space, Typography, Button, message} from "antd";
-import type {TableProps} from "antd";
+import { Flex, Table, Space, Typography, Button, message } from "antd";
+import type { TableProps } from "antd";
 import WtfLayout from "@/components/WtfLayout";
 import AddPositionModal from "@/components/AddPositionModal";
 import styles from "./position.module.css";
@@ -10,25 +10,24 @@ import {
   useWriteErc20Approve,
   useReadPositionManagerGetAllPositions,
   useWritePositionManagerBurn,
-  useWritePositionManagerCollect,
+  useWritePositionManagerCollect
 } from "@/utils/contracts";
-import {getContractAddress} from "@/utils/common";
-import {useAccount} from "@ant-design/web3";
+import { getContractAddress } from "@/utils/common";
+import { useAccount } from "@ant-design/web3";
 
 const PoolListTable: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [openAddPositionModal, setOpenAddPositionModal] = React.useState(false);
-  const {account} = useAccount();
-  const {data = [], refetch} = useReadPositionManagerGetAllPositions({
-    address: getContractAddress("PositionManager"),
+  const { account } = useAccount();
+  const { data = [], refetch } = useReadPositionManagerGetAllPositions({
+    address: getContractAddress("PositionManager")
   });
-  console.log(data,"positions");
 
-  const {writeContractAsync} = useWritePositionManagerMint();
-  const {writeContractAsync: writeErc20Approve} = useWriteErc20Approve();
-  const {writeContractAsync: writePositionManagerBurn} =
+  const { writeContractAsync } = useWritePositionManagerMint();
+  const { writeContractAsync: writeErc20Approve } = useWriteErc20Approve();
+  const { writeContractAsync: writePositionManagerBurn } =
     useWritePositionManagerBurn();
-  const {writeContractAsync: writePositionManagerCollect} =
+  const { writeContractAsync: writePositionManagerCollect } =
     useWritePositionManagerCollect();
 
   const columns: TableProps["columns"] = [
@@ -39,36 +38,36 @@ const PoolListTable: React.FC = () => {
       fixed: "left",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Owner",
       dataIndex: "owner",
       key: "owner",
       fixed: "left",
-      ellipsis: true,
+      ellipsis: true
     },
     {
       title: "Token 0",
       dataIndex: "token0",
       key: "token0",
-      ellipsis: true,
+      ellipsis: true
     },
     {
       title: "Token 1",
       dataIndex: "token1",
       key: "token1",
-      ellipsis: true,
+      ellipsis: true
     },
     {
       title: "Index",
       dataIndex: "index",
-      key: "index",
+      key: "index"
     },
     {
       title: "Fee",
       dataIndex: "fee",
-      key: "fee",
+      key: "fee"
     },
     {
       title: "Liquidity",
@@ -76,17 +75,17 @@ const PoolListTable: React.FC = () => {
       key: "liquidity",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Tick Lower",
       dataIndex: "tickLower",
-      key: "tickLower",
+      key: "tickLower"
     },
     {
       title: "Tick Upper",
       dataIndex: "tickUpper",
-      key: "tickUpper",
+      key: "tickUpper"
     },
     {
       title: "Tokens Owed 0",
@@ -94,7 +93,7 @@ const PoolListTable: React.FC = () => {
       key: "tokensOwed0",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Tokens Owed 1",
@@ -102,7 +101,7 @@ const PoolListTable: React.FC = () => {
       key: "tokensOwed1",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Fee Growth Inside 0",
@@ -110,7 +109,7 @@ const PoolListTable: React.FC = () => {
       key: "feeGrowthInside0LastX128",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Fee Growth Inside 1",
@@ -118,7 +117,7 @@ const PoolListTable: React.FC = () => {
       key: "feeGrowthInside1LastX128",
       render: (value: bigint) => {
         return value.toString();
-      },
+      }
     },
     {
       title: "Actions",
@@ -136,7 +135,7 @@ const PoolListTable: React.FC = () => {
                   try {
                     await writePositionManagerBurn({
                       address: getContractAddress("PositionManager"),
-                      args: [item.id],
+                      args: [item.id]
                     });
                     refetch();
                   } catch (error: any) {
@@ -153,7 +152,7 @@ const PoolListTable: React.FC = () => {
                   try {
                     await writePositionManagerCollect({
                       address: getContractAddress("PositionManager"),
-                      args: [item.id, account?.address as `0x${string}`],
+                      args: [item.id, account?.address as `0x${string}`]
                     });
                     refetch();
                   } catch (error: any) {
@@ -166,15 +165,15 @@ const PoolListTable: React.FC = () => {
             )}
           </Space>
         );
-      },
-    },
+      }
+    }
   ];
 
   return (
     <>
       <Table
         rowKey="id"
-        scroll={{x: "max-content"}}
+        scroll={{ x: "max-content" }}
         title={() => (
           <Flex justify="space-between">
             <div>Positions</div>
@@ -199,7 +198,7 @@ const PoolListTable: React.FC = () => {
         onCancel={() => {
           setOpenAddPositionModal(false);
         }}
-        onCreatePosition={async (createParams) => {
+        onCreatePosition={async createParams => {
           console.log("get createParams", createParams);
           if (account?.address === undefined) {
             message.error("Please connect wallet first");
@@ -212,15 +211,15 @@ const PoolListTable: React.FC = () => {
               address: createParams.token0,
               args: [
                 getContractAddress("PositionManager"),
-                createParams.amount0Desired,
-              ],
+                createParams.amount0Desired
+              ]
             });
             await writeErc20Approve({
               address: createParams.token1,
               args: [
                 getContractAddress("PositionManager"),
-                createParams.amount1Desired,
-              ],
+                createParams.amount1Desired
+              ]
             });
             await writeContractAsync({
               address: getContractAddress("PositionManager"),
@@ -232,9 +231,9 @@ const PoolListTable: React.FC = () => {
                   amount0Desired: createParams.amount0Desired,
                   amount1Desired: createParams.amount1Desired,
                   recipient: account?.address as `0x${string}`,
-                  deadline: createParams.deadline,
-                },
-              ],
+                  deadline: createParams.deadline
+                }
+              ]
             });
             message.success("Add Position Success");
             refetch();
@@ -254,7 +253,7 @@ export default function WtfswapPool() {
     <WtfLayout>
       <div className={styles.container}>
         <Typography.Title level={2}>Postions</Typography.Title>
-        <PoolListTable/>
+        <PoolListTable />
       </div>
     </WtfLayout>
   );
