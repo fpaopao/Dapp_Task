@@ -1,0 +1,38 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: SimpleToken
+    network: sepolia # 可以改为 mainnet, polygon, arbitrum 等
+    source:
+      address: "0xe236ece97ccb6006e35440e5c636a7ba9a7332d3" # 部署后需要替换为实际合约地址
+      abi: SimpleToken
+      startBlock: 9007854 # 设置更早的起始区块以确保捕获所有事件
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - User
+        - Transfer
+        - Mint
+        - Burn
+        - UserStats
+      abis:
+        - name: SimpleToken
+          file: ./abis/SimpleToken.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: TokenMinted(indexed address,uint256,uint256)
+          handler: handleTokenMinted
+        - event: TokenBurned(indexed address,uint256,uint256)
+          handler: handleTokenBurned
+        - event: TokenTransferred(indexed address,indexed address,uint256,uint256)
+          handler: handleTokenTransferred
+      file: ./src/mapping.ts
+features:
+  - grafting
+  - ipfsOnEthereumContracts

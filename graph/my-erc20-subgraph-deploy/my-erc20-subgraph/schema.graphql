@@ -1,0 +1,139 @@
+# GraphQL Schema for SimpleToken Subgraph
+# 简化版本 - 只包含基本实体
+
+"""
+代币实体 - 存储代币的基本信息
+"""
+type Token @entity(immutable: false) {
+  # 代币合约地址作为ID
+  id: ID!
+
+  # 代币基本信息
+  name: String!
+  symbol: String!
+  decimals: Int!
+
+  # 供应量信息
+  totalSupply: BigInt!
+  maxSupply: BigInt!
+
+  # 统计信息
+  totalTransfers: BigInt!
+  totalMints: BigInt!
+  totalBurns: BigInt!
+  totalHolders: BigInt!
+
+  # 金额统计
+  totalMinted: BigInt!
+  totalBurned: BigInt!
+  totalTransferred: BigInt!
+
+  # 时间信息
+  createdAt: BigInt!
+  lastUpdated: BigInt!
+}
+
+"""
+用户实体 - 存储每个用户的代币相关信息
+"""
+type User @entity(immutable: false) {
+  # 代币地址-用户地址作为ID
+  id: ID!
+
+  # 关联的代币
+  token: String!
+
+  # 余额信息
+  balance: BigInt!
+
+  # 统计信息
+  transferCount: BigInt!
+  mintCount: BigInt!
+  burnCount: BigInt!
+
+  # 金额统计
+  totalReceived: BigInt!
+  totalSent: BigInt!
+  totalMinted: BigInt!
+  totalBurned: BigInt!
+
+  # 时间信息
+  firstTransactionAt: BigInt!
+  lastTransactionAt: BigInt!
+
+  # 用户状态
+  isActive: Boolean!
+}
+
+"""
+转账事件实体 - 存储所有转账记录
+"""
+type Transfer @entity(immutable: true) {
+  # 交易哈希 + 日志索引作为ID
+  id: ID!
+
+  # 关联的代币
+  token: String!
+
+  # 转账参与方
+  from: String!
+  to: String!
+
+  # 转账金额
+  amount: BigInt!
+
+  # 区块链信息
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHashBytes: Bytes!
+  logIndex: BigInt!
+
+  # 转账类型标识
+  transferType: String!
+}
+
+"""
+铸造事件实体 - 存储代币铸造记录
+"""
+type Mint @entity(immutable: true) {
+  # 交易哈希 + 日志索引作为ID
+  id: ID!
+
+  # 关联的代币
+  token: String!
+
+  # 接收方
+  to: String!
+
+  # 铸造金额
+  amount: BigInt!
+
+  # 区块链信息
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHashBytes: Bytes!
+  logIndex: BigInt!
+}
+
+"""
+销毁事件实体 - 存储代币销毁记录
+"""
+type Burn @entity(immutable: true) {
+  # 交易哈希 + 日志索引作为ID
+  id: ID!
+
+  # 关联的代币
+  token: String!
+
+  # 销毁方
+  from: String!
+
+  # 销毁金额
+  amount: BigInt!
+
+  # 区块链信息
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHashBytes: Bytes!
+  logIndex: BigInt!
+}
